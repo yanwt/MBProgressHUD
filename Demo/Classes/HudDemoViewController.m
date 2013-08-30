@@ -103,6 +103,20 @@
 	[HUD showWhileExecuting:@selector(myProgressTask) onTarget:self withObject:nil animated:YES];
 }
 
+- (IBAction)showWithLabelDeterminateHorizontalBar:(id)sender {
+	
+	HUD = [[MBProgressHUD alloc] initWithView:self.navigationController.view];
+	[self.navigationController.view addSubview:HUD];
+	
+	// Set determinate bar mode
+	HUD.mode = MBProgressHUDModeDeterminateHorizontalBar;
+	
+	HUD.delegate = self;
+	
+	// myProgressTask uses the HUD instance to update progress
+	[HUD showWhileExecuting:@selector(myProgressTask) onTarget:self withObject:nil animated:YES];
+}
+
 - (IBAction)showWithCustomView:(id)sender {
 	
 	HUD = [[MBProgressHUD alloc] initWithView:self.navigationController.view];
