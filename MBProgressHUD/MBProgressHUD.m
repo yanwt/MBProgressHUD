@@ -514,7 +514,15 @@ static const CGFloat kDetailsLabelFontSize = 12.f;
 	totalSize.width = MAX(totalSize.width, indicatorF.size.width);
 	totalSize.height += indicatorF.size.height;
 	
-	CGSize labelSize = [label.text sizeWithFont:label.font];
+  CGSize labelSize;
+  if ([label.text respondsToSelector:@selector(sizeWithAttributes:)]) {
+     labelSize = [label.text sizeWithAttributes:@{NSFontAttributeName:label.font}];
+  } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    labelSize = [label.text sizeWithFont:label.font];
+#pragma clang diagnostic pop
+  }
 	labelSize.width = MIN(labelSize.width, maxWidth);
 	totalSize.width = MAX(totalSize.width, labelSize.width);
 	totalSize.height += labelSize.height;
@@ -524,8 +532,24 @@ static const CGFloat kDetailsLabelFontSize = 12.f;
 
 	CGFloat remainingHeight = bounds.size.height - totalSize.height - kPadding - 4 * margin; 
 	CGSize maxSize = CGSizeMake(maxWidth, remainingHeight);
-	CGSize detailsLabelSize = [detailsLabel.text sizeWithFont:detailsLabel.font 
-								constrainedToSize:maxSize lineBreakMode:detailsLabel.lineBreakMode];
+  CGSize detailsLabelSize;
+  if ([detailsLabel.text respondsToSelector:
+       @selector(boundingRectWithSize:options:attributes:context:)])
+  {
+    detailsLabelSize =
+      [detailsLabel.text boundingRectWithSize:maxSize
+                                      options:NSStringDrawingUsesFontLeading
+                                             |NSStringDrawingUsesLineFragmentOrigin
+                                   attributes:@{NSFontAttributeName:label.font}
+                                      context:nil].size;
+  } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    detailsLabelSize = [detailsLabel.text sizeWithFont:detailsLabel.font
+                                     constrainedToSize:maxSize
+                                         lineBreakMode:detailsLabel.lineBreakMode];
+#pragma clang diagnostic pop
+  }
 	totalSize.width = MAX(totalSize.width, detailsLabelSize.width);
 	totalSize.height += detailsLabelSize.height;
 	if (detailsLabelSize.height > 0.f && (indicatorF.size.height > 0.f || labelSize.height > 0.f)) {
